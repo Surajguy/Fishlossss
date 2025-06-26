@@ -41,7 +41,7 @@ export default function QuickStats() {
       transition={{ delay: 0.3 }}
       className="card p-6"
     >
-      <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
+      <h2 className="text-lg font-semibold text-white mb-6">
         Your Fishing Stats
       </h2>
       
@@ -52,22 +52,22 @@ export default function QuickStats() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.4 + index * 0.1 }}
-            className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4"
+            className="bg-gray-700/50 rounded-xl p-4"
           >
             <div className="flex items-center justify-between mb-2">
-              <stat.icon className="h-5 w-5 text-primary-500" />
+              <stat.icon className="h-5 w-5 text-accent-orange" />
               <span className={`text-xs font-medium px-2 py-1 rounded-full ${
                 stat.changeType === 'increase' 
-                  ? 'text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-900/30'
-                  : 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800'
+                  ? 'text-accent-green bg-green-900/30'
+                  : 'text-gray-400 bg-gray-800'
               }`}>
                 {stat.change}
               </span>
             </div>
-            <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+            <div className="text-2xl font-bold text-white mb-1">
               {stat.value}
             </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">
+            <div className="text-sm text-gray-400">
               {stat.name}
             </div>
           </motion.div>

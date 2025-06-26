@@ -12,21 +12,21 @@ const quickActions = [
     description: 'Upload a photo to get AI-powered fishing recommendations',
     icon: Camera,
     href: '/spot-analyzer',
-    color: 'from-blue-500 to-blue-600',
+    color: 'bg-accent-blue',
   },
   {
     name: 'Log Catch',
     description: 'Record your latest catch with details and photos',
     icon: BookOpen,
     href: '/catch-log',
-    color: 'from-green-500 to-green-600',
+    color: 'bg-accent-green',
   },
   {
     name: 'Check Forecast',
     description: 'Get personalized fishing conditions and bite predictions',
     icon: CloudSun,
     href: '/forecast',
-    color: 'from-orange-500 to-orange-600',
+    color: 'bg-accent-orange',
   },
 ]
 
@@ -39,10 +39,10 @@ export default function Dashboard() {
         animate={{ opacity: 1, y: 0 }}
         className="text-center py-8"
       >
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+        <h1 className="text-4xl font-bold text-white mb-4">
           Ready to catch some fish?
         </h1>
-        <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+        <p className="text-xl text-gray-400 max-w-2xl mx-auto">
           Your smart fishing assistant is here to help you find the best spots, 
           track your catches, and predict the perfect fishing conditions.
         </p>
@@ -59,13 +59,13 @@ export default function Dashboard() {
           >
             <Link to={action.href}>
               <div className="card p-6 hover:scale-105 transition-transform cursor-pointer">
-                <div className={`w-12 h-12 bg-gradient-to-r ${action.color} rounded-xl flex items-center justify-center mb-4`}>
+                <div className={`w-12 h-12 ${action.color} rounded-xl flex items-center justify-center mb-4`}>
                   <action.icon className="h-6 w-6 text-white" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                <h3 className="text-lg font-semibold text-white mb-2">
                   {action.name}
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                <p className="text-gray-400 text-sm">
                   {action.description}
                 </p>
               </div>

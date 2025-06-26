@@ -1,6 +1,7 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
@@ -11,6 +12,15 @@ from catch_logger import CatchLogger
 from forecast import get_fishing_forecast
 
 app = FastAPI(title="Fishing Assistant API")
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, replace with your frontend URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Initialize catch logger
 catch_logger = CatchLogger()
@@ -34,180 +44,110 @@ def read_root():
     <!DOCTYPE html>
     <html>
     <head>
-        <title>Fishing Assistant</title>
+        <title>Fishing Assistant API</title>
         <style>
-            body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; }
-            .container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-            .section { border: 1px solid #ddd; padding: 20px; border-radius: 8px; }
-            .full-width { grid-column: 1 / -1; }
-            input, select, textarea, button { width: 100%; padding: 10px; margin: 5px 0; box-sizing: border-box; }
-            button { background-color: #4CAF50; color: white; border: none; cursor: pointer; }
-            button:hover { background-color: #45a049; }
-            .result { background-color: #f9f9f9; padding: 15px; margin-top: 15px; border-radius: 5px; }
-            #catchList { max-height: 300px; overflow-y: auto; }
-            .catch-entry { border-bottom: 1px solid #eee; padding: 10px 0; }
+            body { 
+                font-family: Arial, sans-serif; 
+                max-width: 800px; 
+                margin: 0 auto; 
+                padding: 20px;
+                background-color: #1a1a1a;
+                color: #ffffff;
+            }
+            .endpoint { 
+                border: 1px solid #333; 
+                padding: 15px; 
+                margin: 10px 0; 
+                border-radius: 8px;
+                background-color: #2a2a2a;
+            }
+            .method { 
+                background-color: #ff6b35; 
+                color: white; 
+                padding: 4px 8px; 
+                border-radius: 4px; 
+                font-size: 12px;
+                font-weight: bold;
+            }
+            h1 { color: #ff6b35; }
+            h2 { color: #ffffff; }
         </style>
     </head>
     <body>
-        <h1>🎣 Fishing Assistant</h1>
+        <h1>🎣 FishCast API</h1>
+        <p>AI-powered fishing assistant backend</p>
         
-        <div class="container">
-            <div class="section">
-                <h2>📸 Spot Analysis</h2>
-                <form id="imageForm" enctype="multipart/form-data">
-                    <input type="file" id="imageFile" accept="image/*" required>
-                    <button type="submit">Analyze Fishing Spot</button>
-                </form>
-                <div id="imageResult" class="result" style="display:none;"></div>
-            </div>
-            
-            <div class="section">
-                <h2>🌤️ Fishing Forecast</h2>
-                <form id="forecastForm">
-                    <input type="text" id="location" placeholder="Enter location (e.g., Lake Michigan)" required>
-                    <button type="submit">Get Forecast</button>
-                </form>
-                <div id="forecastResult" class="result" style="display:none;"></div>
-            </div>
-            
-            <div class="section">
-                <h2>📝 Log Your Catch</h2>
-                <form id="catchForm">
-                    <input type="text" id="species" placeholder="Fish species" required>
-                    <input type="text" id="bait" placeholder="Bait used" required>
-                    <input type="text" id="catchLocation" placeholder="Location" required>
-                    <input type="date" id="date" required>
-                    <input type="time" id="time" required>
-                    <textarea id="notes" placeholder="Additional notes (optional)" rows="3"></textarea>
-                    <button type="submit">Log Catch</button>
-                </form>
-                <div id="catchResult" class="result" style="display:none;"></div>
-            </div>
-            
-            <div class="section">
-                <h2>🐟 Your Catch History</h2>
-                <button onclick="loadCatches()">Refresh Catch List</button>
-                <div id="catchList" class="result"></div>
-            </div>
+        <h2>Available Endpoints:</h2>
+        
+        <div class="endpoint">
+            <span class="method">POST</span>
+            <strong>/analyze</strong>
+            <p>Upload a fishing spot image for AI analysis</p>
+            <small>Accepts: multipart/form-data with image file</small>
         </div>
-
-        <script>
-            // Set current date and time
-            document.getElementById('date').value = new Date().toISOString().split('T')[0];
-            document.getElementById('time').value = new Date().toTimeString().split(' ')[0].slice(0,5);
-
-            // Image analysis
-            document.getElementById('imageForm').onsubmit = async function(e) {
-                e.preventDefault();
-                const formData = new FormData();
-                formData.append('file', document.getElementById('imageFile').files[0]);
-                
-                try {
-                    const response = await fetch('/analyze', {
-                        method: 'POST',
-                        body: formData
-                    });
-                    const result = await response.json();
-                    document.getElementById('imageResult').style.display = 'block';
-                    document.getElementById('imageResult').innerHTML = '<strong>Recommendation:</strong> ' + result.recommendation;
-                } catch (error) {
-                    document.getElementById('imageResult').style.display = 'block';
-                    document.getElementById('imageResult').innerHTML = '<strong>Error:</strong> ' + error.message;
-                }
-            };
-
-            // Fishing forecast
-            document.getElementById('forecastForm').onsubmit = async function(e) {
-                e.preventDefault();
-                const location = document.getElementById('location').value;
-                
-                try {
-                    const response = await fetch('/forecast', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({location: location})
-                    });
-                    const result = await response.json();
-                    document.getElementById('forecastResult').style.display = 'block';
-                    document.getElementById('forecastResult').innerHTML = 
-                        '<strong>Bite Score:</strong> ' + result.bite_score + '/10<br>' +
-                        '<strong>Conditions:</strong> ' + result.conditions + '<br>' +
-                        '<strong>Best Times:</strong> ' + result.best_times.join(', ');
-                } catch (error) {
-                    document.getElementById('forecastResult').style.display = 'block';
-                    document.getElementById('forecastResult').innerHTML = '<strong>Error:</strong> ' + error.message;
-                }
-            };
-
-            // Log catch
-            document.getElementById('catchForm').onsubmit = async function(e) {
-                e.preventDefault();
-                const catchData = {
-                    species: document.getElementById('species').value,
-                    bait: document.getElementById('bait').value,
-                    location: document.getElementById('catchLocation').value,
-                    date: document.getElementById('date').value,
-                    time: document.getElementById('time').value,
-                    notes: document.getElementById('notes').value
-                };
-                
-                try {
-                    const response = await fetch('/catches', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify(catchData)
-                    });
-                    const result = await response.json();
-                    document.getElementById('catchResult').style.display = 'block';
-                    document.getElementById('catchResult').innerHTML = '<strong>Success:</strong> ' + result.message;
-                    document.getElementById('catchForm').reset();
-                    document.getElementById('date').value = new Date().toISOString().split('T')[0];
-                    document.getElementById('time').value = new Date().toTimeString().split(' ')[0].slice(0,5);
-                    loadCatches();
-                } catch (error) {
-                    document.getElementById('catchResult').style.display = 'block';
-                    document.getElementById('catchResult').innerHTML = '<strong>Error:</strong> ' + error.message;
-                }
-            };
-
-            // Load catches
-            async function loadCatches() {
-                try {
-                    const response = await fetch('/catches');
-                    const catches = await response.json();
-                    const catchList = document.getElementById('catchList');
-                    
-                    if (catches.length === 0) {
-                        catchList.innerHTML = '<p>No catches logged yet. Start fishing!</p>';
-                    } else {
-                        catchList.innerHTML = catches.map(catch_ => 
-                            '<div class="catch-entry">' +
-                            '<strong>' + catch_.species + '</strong> caught on ' + catch_.date + ' at ' + catch_.time + '<br>' +
-                            '<small>Location: ' + catch_.location + ' | Bait: ' + catch_.bait + '</small>' +
-                            (catch_.notes ? '<br><small>Notes: ' + catch_.notes + '</small>' : '') +
-                            '</div>'
-                        ).join('');
-                    }
-                } catch (error) {
-                    document.getElementById('catchList').innerHTML = '<p>Error loading catches: ' + error.message + '</p>';
-                }
-            }
-
-            // Load catches on page load
-            loadCatches();
-        </script>
+        
+        <div class="endpoint">
+            <span class="method">POST</span>
+            <strong>/catches</strong>
+            <p>Log a new fishing catch</p>
+            <small>Accepts: JSON with catch details</small>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method">GET</span>
+            <strong>/catches</strong>
+            <p>Get all logged catches</p>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method">POST</span>
+            <strong>/forecast</strong>
+            <p>Get fishing forecast for a location</p>
+            <small>Accepts: JSON with location details</small>
+        </div>
+        
+        <p><strong>Status:</strong> ✅ OpenRouter AI integration active</p>
     </body>
     </html>
     """
 
 @app.post("/analyze")
 async def analyze_image(file: UploadFile = File(...)):
+    """
+    Analyze a fishing spot image using AI
+    """
     try:
+        # Validate file type
+        if not file.content_type.startswith('image/'):
+            raise HTTPException(status_code=400, detail="File must be an image")
+        
+        # Read image bytes
         image_bytes = await file.read()
-        recommendation = analyze_fishing_spot(image_bytes)
-        return JSONResponse(content={"recommendation": recommendation})
+        
+        # Validate file size (max 10MB)
+        if len(image_bytes) > 10 * 1024 * 1024:
+            raise HTTPException(status_code=400, detail="Image too large (max 10MB)")
+        
+        # Analyze the image
+        analysis = analyze_fishing_spot(image_bytes)
+        
+        return JSONResponse(content={
+            "success": True,
+            "recommendation": analysis,
+            "filename": file.filename
+        })
+        
+    except HTTPException:
+        raise
     except Exception as e:
-        return JSONResponse(status_code=500, content={"error": str(e)})
+        print(f"Error in analyze endpoint: {str(e)}")
+        return JSONResponse(
+            status_code=500, 
+            content={
+                "success": False,
+                "error": f"Analysis failed: {str(e)}"
+            }
+        )
 
 @app.post("/catches")
 async def log_catch(catch_entry: CatchEntry):
@@ -232,3 +172,12 @@ async def fishing_forecast(request: ForecastRequest):
         return forecast
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint"""
+    return {"status": "healthy", "service": "FishCast API"}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -1,4 +1,4 @@
-run = ["uvicorn", "main:app", "--host", "0.0.0.0", "--reload"]
+run = ["poetry", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--reload"]
 
 modules = ["python-3.11"]
 
@@ -8,7 +8,7 @@ hidden = [".pythonlibs"]
 channel = "stable-24_05"
 
 [deployment]
-run = ["uvicorn", "main:app", "--host", "0.0.0.0"]
+run = ["poetry", "run", "uvicorn", "main:app", "--host", "0.0.0.0"]
 deploymentTarget = "cloudrun"
 
 [[ports]]
@@ -25,4 +25,4 @@ mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+args = "poetry run uvicorn main:app --host 0.0.0.0 --port 8000 --reload"

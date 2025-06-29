@@ -81,27 +81,27 @@ def read_root():
         
         <div class="endpoint">
             <span class="method">POST</span>
-            <strong>/analyze</strong>
+            <strong>/api/analyze</strong>
             <p>Upload a fishing spot image for AI analysis</p>
             <small>Accepts: multipart/form-data with image file</small>
         </div>
         
         <div class="endpoint">
             <span class="method">POST</span>
-            <strong>/catches</strong>
+            <strong>/api/catches</strong>
             <p>Log a new fishing catch</p>
             <small>Accepts: JSON with catch details</small>
         </div>
         
         <div class="endpoint">
             <span class="method">GET</span>
-            <strong>/catches</strong>
+            <strong>/api/catches</strong>
             <p>Get all logged catches</p>
         </div>
         
         <div class="endpoint">
             <span class="method">POST</span>
-            <strong>/forecast</strong>
+            <strong>/api/forecast</strong>
             <p>Get fishing forecast for a location</p>
             <small>Accepts: JSON with location details</small>
         </div>
@@ -111,7 +111,7 @@ def read_root():
     </html>
     """
 
-@app.post("/analyze")
+@app.post("/api/analyze")
 async def analyze_image(file: UploadFile = File(...)):
     """
     Analyze a fishing spot image using AI
@@ -149,7 +149,7 @@ async def analyze_image(file: UploadFile = File(...)):
             }
         )
 
-@app.post("/catches")
+@app.post("/api/catches")
 async def log_catch(catch_entry: CatchEntry):
     try:
         result = catch_logger.add_catch(catch_entry.dict())
@@ -157,7 +157,7 @@ async def log_catch(catch_entry: CatchEntry):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/catches")
+@app.get("/api/catches")
 async def get_catches():
     try:
         catches = catch_logger.get_all_catches()
@@ -165,7 +165,7 @@ async def get_catches():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/forecast")
+@app.post("/api/forecast")
 async def fishing_forecast(request: ForecastRequest):
     try:
         forecast = get_fishing_forecast(request.location, request.latitude, request.longitude)

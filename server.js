@@ -1,3 +1,7 @@
+// Node.js server disabled for Python testing
+// Uncomment the code below to re-enable the Node.js server
+
+/*
 const express = require('express');
 const multer = require('multer');
 const cors = require('cors');
@@ -251,3 +255,7 @@ app.listen(port, () => {
   console.log('  POST /api/forecast - Get fishing forecast');
   console.log('  GET  /health - Health check');
 });
+*/
+
+console.log("Node.js server disabled for Python testing");
+console.log("Run 'python openrouter.py' to test your OpenRouter setup");

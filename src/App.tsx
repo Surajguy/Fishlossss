@@ -25,7 +25,7 @@ function AppContent() {
     return () => clearTimeout(timer)
   }, [])
 
-  if (losading || isInitialLoad) {
+  if (loading || isInitialLoad) {
     return <LoadingScreen />
   }
 
